@@ -1,188 +1,19 @@
 <html>
 <head>
-<script async src="https://nwdb.info/embed.js"></script>
-</head>
-
-
-
-
-<body>
-	
-	<input id="url" placeholder="paste nwdb.info url..." type="text" />
-	<button id="submit" type="button">Go!</button>
 
 	<style>
 		.tb { border-collapse: collapse; }
 		.tb th, .tb td { padding: 20px; border: solid 1px #777; }
 		.tb th { background-color: #ff33cc; }
 	</style>
-	<table class="tb" style="width:300px;">
-		<!-- here goes our data! -->
-	</table>
+</head>
+
+<body>
 	
+	<div id="app"></div>
 
-
-	<script>
-		
-		const getBuckets = async (url) => {
-		  const r = await fetch('https://api.allorigins.win/raw?url=' + url + '.json');
-		  const json = await r.json();
-		  const bucket = json.data.perkBuckets.filter(e => e.type === 'Generated').pop();
-
-		  return bucket.perks;
-		}
-
-		function generateTableHead(table, headers) 
-		{
-			let thead = table.createTHead();
-			let row = thead.insertRow();
-			for (let key of headers) {
-				let th = document.createElement("th");
-				let text = document.createTextNode(key);
-				th.appendChild(text);
-				row.appendChild(th);
-			}
-		}
-		function generateTableContents(table, tableData) 
-		{
-			for (rowNumber in tableData)
-			{
-				let row = table.insertRow();
-				for (key in tableData[rowNumber]) 
-				{
-					let cell = row.insertCell();
-					if (key <= 1)	// handle the hyper ref link without the creation of a texnote
-					{
-						cell.appendChild(tableData[rowNumber][key]);
-					}
-					else
-					{
-						let text = document.createTextNode(tableData[rowNumber][key]);
-						cell.appendChild(text);
-					}
-					
-				}
-			}
-		}
-		function generateTable(table, headers, tableData) 
-		{
-			table.deleteTHead();
-			generateTableHead(table, headers);
-			generateTableContents(table, tableData);
-		}
-
-		function createPerkHref(perkInfo)
-		{
-			const perkHref = document.createElement("a");
-			perkHref.href = "https://nwdb.info/db/perk/" + perkInfo.perk.id;
-			perkHref.innerHTML = perkInfo.perk.name;
-			return perkHref;
-		}
-
-		// one of the perk checkboxes has been clicked, doesnt matter which one, we need to go through all the perks anyway
-		function checkboxClicked(cb)
-		{
-			console.log("ey i got clicked mate, dod something");
-
-			let removedLabels = [];
-			// loop through tableData and find all the checked boxes
-			tableData.forEach((row, i) => 
-			{
-				if (row[0].checked)
-				{
-					// store the label in the list (NOTE: perks[i].perk.labels is a list itself, store all the entries)
-					perks[i].perk.labels.forEach((label, j) => 
-					{
-						removedLabels.push(label);
-					});
-				}
-				//tableData.push([perkCheckbox, createPerkHref(item), item.perk.labels, (item.chance*100).toFixed(2), 10]);
-			});
-
-			// knowing which of the labels to remove, loop throught the perks, add all the chances of the perks that are 
-			// not removed cause of their label and put NaN for the chance of the removed labeledd perks.
-			var totalChanceRemaining = 0;
-			tableData.forEach((row, i) => 
-			{
-				var removePerk = false;
-				removedLabels.forEach((label, j) =>
-				{
-					if (perks[i].perk.labels.indexOf(label) !== -1)
-					{
-						removePerk = true;
-					}
-				});
-
-				if (removePerk)
-				{
-					// override the chances of the perks with NaN
-					row[3] = NaN;
-					row[4] = NaN;
-				}
-				else
-				{
-					// override the chances of the perks with their old value taken from perks
-					row[3] = (perks[i].chance*100).toFixed(2);
-
-					totalChanceRemaining += perks[i].chance;
-
-				}
-			});
-
-			let justACheckSum_should_be_100 = 0;
-			// loop through a third time... and 
-			tableData.forEach((row, i) => 
-			{
-				if (!isNaN(row[3]))
-				{
-					// calculate the new chance after the removal of the lables and display it in row[4]
-					let newChance = perks[i].chance*(100/totalChanceRemaining);
-					justACheckSum_should_be_100 += newChance;
-					row[4] = newChance.toFixed(2);
-					
-
-				}
-			});
-			console.log("justACheckSum_should_be_100: " + justACheckSum_should_be_100);
-
-			// render the table again
-			generateTable(table, tableHeader, tableData);
-		}
-
-
-		const input = document.getElementById("url");
-		const button = document.getElementById("submit");
-		
-		let tableHeader = [" ", "Perk", "Label", "Chance", "New Chance"];
-		let tableData = [];
-		var perks;
-
-		let table = document.querySelector("table");
-		
-		button.addEventListener("click", async () => {
-			const url = input.value;
-
-			console.log(url);
-			perks = await getBuckets(url);
-			
-			tableData = [];
-			// fill the tableData with only the relevant perk infos
-			perks.forEach((item, i) => 
-			{
-				//<input type="checkbox" id="vehicle1" name="vehicle1" value="Bike">
-				const perkCheckbox = document.createElement("INPUT");
-				perkCheckbox.setAttribute("type", "checkbox");
-				perkCheckbox.setAttribute("onclick", "checkboxClicked(this)");
-				perkCheckbox.setAttribute("value", i);
-				tableData.push([perkCheckbox, createPerkHref(item), item.perk.labels, (item.chance*100).toFixed(2), (item.chance*100).toFixed(2)]);
-			});
-
-			// build the table 
-			generateTable(table, tableHeader, tableData);
-		});
-		//const perks = await getBuckets('https://nwdb.info/db/item/2hgreataxet5');
-	</script>
-
+	<script async src="https://nwdb.info/embed.js"></script>
+	<script type="module" src="./script.module.js"></script>
 	
 </body>
 
