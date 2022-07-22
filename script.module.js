@@ -19,17 +19,18 @@ function App() {
         const newState = JSON.parse(JSON.stringify(state));
         const checkedItem = newState[index];
         checkedItem.checked = !checkedItem.checked;
-        setRemovedLabels(checkedItem.labels);
+        const newRemovedLabels = checkedItem.checked ? checkedItem.labels : []
+        setRemovedLabels(newRemovedLabels);
         let totalChanceRemaining = 0;
         newState.forEach(item => {
-          if (!compareLabels(item.labels, checkedItem.labels)) {
+          if (!compareLabels(item.labels, newRemovedLabels)) {
             item.chance = item.original.chance;
             totalChanceRemaining += item.original.chance;
           } 
         }); 
 
         newState.forEach(item => {
-          if (!compareLabels(item.labels, checkedItem.labels)) {
+          if (!compareLabels(item.labels, newRemovedLabels)) {
             item.chanceAfter = item.chance / totalChanceRemaining ;
           }
         });
