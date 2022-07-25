@@ -118,7 +118,7 @@ function App() {
                     return html`
                       <tr style=${{'background-color': item.checked || compareLabels(item.perk.labels) ? 'lightgray' : 'white'}}>
                         <td>
-                          <input disabled=${compareLabels(item.perk.labels) && !item.checked} type="checkbox" value=${item.checked}
+                          <input disabled=${compareLabels(item.perk.labels) && !item.checked} type="checkbox" checked=${item.checked}
                             onChange=${()=> updateData({ type: 'check', index })}/>
                         </td>
                         <td>
