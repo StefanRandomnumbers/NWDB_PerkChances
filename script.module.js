@@ -18,6 +18,9 @@ function App() {
         // get a copy
         const newState = JSON.parse(JSON.stringify(state));
         const checkedItem = newState[index];
+        if (checkedItem.checked === false) {
+          newState.forEach(e => e.checked = false)
+        }
         checkedItem.checked = !checkedItem.checked;
         const newRemovedLabels = checkedItem.checked ? checkedItem.labels : []
         setRemovedLabels(newRemovedLabels);
