@@ -95,7 +95,7 @@ function App() {
 
   return html`
     <div>
-      <form onSubmit=${(e) => {e.preventDefault(); updateResults()}}>
+      <form class="form" onSubmit=${(e) => {e.preventDefault(); updateResults()}}>
         <input id="url" placeholder="paste nwdb.info url..." type="text" value=${url} onChange=${(e) => setUrl(e.target.value)} />
         <button id="submit" type="submit">Go!</button>
       </form>
