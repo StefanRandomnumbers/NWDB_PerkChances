@@ -105,21 +105,26 @@ function App() {
               </thead>
               <tbody>
                 ${
-                  data.map((item, index) => html`
-                    <tr>
-                      <td>
-                        <input disabled=${compareLabels(item.perk.labels) && !item.checked} type="checkbox" value=${item.checked} onChange=${() => updateData({ type: 'check', index })}/>
-                      </td>
-                      <td>
-                        <a href="${'https://nwdb.info/db/perk/' + item.perk.id}">${item.perk.name}</a>
-                      </td>
-                      <td>
-                        ${item.perk.labels.join(', ')}
-                      </td>
-                      <td>${item.checked || compareLabels(item.perk.labels) ? '-' : (item.chance*100).toFixed(2)}</td>
-                      <td>${item.checked || compareLabels(item.perk.labels) ? '-' : (item.chanceAfter*100).toFixed(2)}</td>
-                    </tr>
-                  `)
+                  data.map((item, index) => {
+                    if (item.checked || !compareLabels(item.perk.labels)) {
+                      return html`
+                        <tr>
+                          <td>
+                            <input disabled=${compareLabels(item.perk.labels) && !item.checked} type="checkbox" value=${item.checked}
+                              onChange=${()=> updateData({ type: 'check', index })}/>
+                          </td>
+                          <td>
+                            <a href="${'https://nwdb.info/db/perk/' + item.perk.id}">${item.perk.name}</a>
+                          </td>
+                          <td>
+                            ${item.perk.labels.join(', ')}
+                          </td>
+                          <td>${item.checked || compareLabels(item.perk.labels) ? '-' : (item.chance * 100).toFixed(2)}</td>
+                          <td>${item.checked || compareLabels(item.perk.labels) ? '-' : (item.chanceAfter * 100).toFixed(2)}</td>
+                        </tr> `;
+                  }
+                  else return null;
+                })
                 }
               </tbody>
             </table>
