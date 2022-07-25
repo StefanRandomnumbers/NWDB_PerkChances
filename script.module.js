@@ -1,5 +1,5 @@
-import { html, render, useState, useEffect, useRef, useReducer } from 'https://unpkg.com/htm/preact/standalone.mjs?module'
-import { Component } from 'https://unpkg.com/preact?module';
+import { html, render, useState, useEffect, useRef, useReducer } from '/standalone.js'
+import { Component } from '/preact.module.js';
 
 
 function App() {
@@ -42,7 +42,11 @@ function App() {
   const [data, updateData] = useReducer(dataReducer, []);
 
   const getBuckets = async (url) => {
-    const r = await fetch('https://api.allorigins.win/raw?url=' + url + '.json');
+    let correctUrl = url;
+    if (!url.includes('https://')) {
+      correctUrl = 'https://' + correctUrl;
+    }
+    const r = await fetch('https://api.allorigins.win/raw?url=' + correctUrl + '.json');
     const json = await r.json();
     const bucket = json.data.perkBuckets.filter(e => e.type === 'Generated').pop();
 
@@ -91,8 +95,10 @@ function App() {
 
   return html`
     <div>
-      <input id="url" placeholder="paste nwdb.info url..." type="text" value=${url} onChange=${(e) => setUrl(e.target.value)} />
-      <button id="submit" type="button" onClick=${() => updateResults()}>Go!</button>
+      <form onSubmit=${(e) => {e.preventDefault(); updateResults()}}>
+        <input id="url" placeholder="paste nwdb.info url..." type="text" value=${url} onChange=${(e) => setUrl(e.target.value)} />
+        <button id="submit" type="submit">Go!</button>
+      </form>
       ${ resultsReady ? 
           html`
             <table class="tb">
@@ -106,24 +112,21 @@ function App() {
               <tbody>
                 ${
                   data.map((item, index) => {
-                    if (item.checked || !compareLabels(item.perk.labels)) {
-                      return html`
-                        <tr>
-                          <td>
-                            <input disabled=${compareLabels(item.perk.labels) && !item.checked} type="checkbox" value=${item.checked}
-                              onChange=${()=> updateData({ type: 'check', index })}/>
-                          </td>
-                          <td>
-                            <a href="${'https://nwdb.info/db/perk/' + item.perk.id}">${item.perk.name}</a>
-                          </td>
-                          <td>
-                            ${item.perk.labels.join(', ')}
-                          </td>
-                          <td>${item.checked || compareLabels(item.perk.labels) ? '-' : (item.chance * 100).toFixed(2)}</td>
-                          <td>${item.checked || compareLabels(item.perk.labels) ? '-' : (item.chanceAfter * 100).toFixed(2)}</td>
-                        </tr> `;
-                  }
-                  else return null;
+                    return html`
+                      <tr style=${{'background-color': item.checked || compareLabels(item.perk.labels) ? 'lightgray' : 'white'}}>
+                        <td>
+                          <input disabled=${compareLabels(item.perk.labels) && !item.checked} type="checkbox" value=${item.checked}
+                            onChange=${()=> updateData({ type: 'check', index })}/>
+                        </td>
+                        <td>
+                          <a href="${'https://nwdb.info/db/perk/' + item.perk.id}">${item.perk.name}</a>
+                        </td>
+                        <td>
+                          ${item.perk.labels.join(', ')}
+                        </td>
+                        <td>${item.checked || compareLabels(item.perk.labels) ? '-' : (item.chance * 100).toFixed(2)}</td>
+                        <td>${item.checked || compareLabels(item.perk.labels) ? '-' : (item.chanceAfter * 100).toFixed(2)}</td>
+                      </tr> `;
                 })
                 }
               </tbody>
