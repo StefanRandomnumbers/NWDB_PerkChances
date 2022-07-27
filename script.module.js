@@ -33,11 +33,16 @@ function App() {
           } 
         }); 
 
+        let checksum = 0;
         newState.forEach(item => {
           if (!compareLabels(item.labels, newRemovedLabels)) {
             item.chanceAfter = item.chance / totalChanceRemaining ;
+            checksum += item.chanceAfter;
           }
         });
+
+        console.log('checksum is : ', checksum);
+
 
         return newState;
     }
