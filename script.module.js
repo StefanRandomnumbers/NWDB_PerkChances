@@ -7,6 +7,7 @@ function App() {
   const [url, setUrl] = useState('');
   const [perkInfos, setPerkInfos] = useState([]);
   const [removedLabels, setRemovedLabels] = useState([]);
+  const [hideRemovedLabels, setHideRemovedLabels] = useState(false);
 
   const dataReducer = (state, action) =>  {
     switch(action.type) {
@@ -18,6 +19,9 @@ function App() {
         // get a copy
         const newState = JSON.parse(JSON.stringify(state));
         const checkedItem = newState[index];
+        if (checkedItem.checked === false) {
+          newState.forEach(e => e.checked = false)
+        }
         checkedItem.checked = !checkedItem.checked;
         const newRemovedLabels = checkedItem.checked ? checkedItem.labels : []
         setRemovedLabels(newRemovedLabels);
@@ -98,7 +102,19 @@ function App() {
       <form class="form" onSubmit=${(e) => {e.preventDefault(); updateResults()}}>
         <input id="url" placeholder="paste nwdb.info url..." type="text" value=${url} onChange=${(e) => setUrl(e.target.value)} />
         <button id="submit" type="submit">Go!</button>
+
+        <div>
+          <input id="hideremoved" type="checkbox" checked=${hideRemovedLabels} onChange=${() => setHideRemovedLabels(!hideRemovedLabels)}/>
+          <label for="hideremoved">Select this if you want to hide eliminated perks from list</label>
+        </div>
       </form>
+      ${resultsReady ?
+        html`
+          <p>
+            Select a perk to craft with, this will in turn increase the chances of every other perk that does not share labels with selected one.
+          </p>
+        ` : null
+      }
       ${ resultsReady ? 
           html`
             <table class="tb">
@@ -112,11 +128,16 @@ function App() {
               <tbody>
                 ${
                   data.map((item, index) => {
+                    const perkIsRemoved = compareLabels(item.perk.labels) && !item.checked;
+                    if (perkIsRemoved && hideRemovedLabels) {
+                      return null;
+                    }
+
                     return html`
-                      <tr style=${{'background-color': item.checked || compareLabels(item.perk.labels) ? 'lightgray' : 'white'}}>
+                      <tr style=${{ 'background-color': compareLabels(item.perk.labels) ? 'lightgray' : 'white' }}>
                         <td>
-                          <input disabled=${compareLabels(item.perk.labels) && !item.checked} type="checkbox" value=${item.checked}
-                            onChange=${()=> updateData({ type: 'check', index })}/>
+                          <input disabled=${compareLabels(item.perk.labels) && !item.checked} type="checkbox" checked=${item.checked}
+                            onChange=${() => updateData({ type: 'check', index })}/>
                         </td>
                         <td>
                           <a href="${'https://nwdb.info/db/perk/' + item.perk.id}">${item.perk.name}</a>
