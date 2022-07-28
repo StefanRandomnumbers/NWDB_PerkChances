@@ -68,6 +68,8 @@ function App() {
 
         if (!selected.length) {
           modifyChances([])
+          setRollChance(null);
+          return newState;
         }
 
         selected.forEach((selectedPerk, i) => {
