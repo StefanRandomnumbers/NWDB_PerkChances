@@ -104,6 +104,9 @@ function App() {
     // fill the tableData with only the relevant perk infos
     const r = await getBuckets(url);
   
+    setRemovedLabels([]);
+    setRollChance(null);
+    setSelectedPerks([]);
     setPerkInfos(r);
   }
 
