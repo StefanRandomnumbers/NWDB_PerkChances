@@ -1,27 +1,90 @@
 <html>
+
 <head>
 
 	<style>
-		.form { margin-bottom: 10px; padding: 10px; display: flex; flex-direction: row; }
+		* {
+			font-family: Arial, Helvetica, sans-serif;
+		}
+
+		p {
+			margin-inline: auto;
+			width: 80%;
+		}
+
+		.form {
+			margin-bottom: 10px;
+			padding: 10px;
+			display: flex;
+			width: 80%;
+			justify-content: left;
+			margin-inline: auto;
+		}
+
 		.form input {
 			margin-right: 10px;
 		}
+
 		.form button {
 			margin-right: 20px;
 		}
-		.tb { border-collapse: collapse; }
-		.tb th, .tb td { padding: 10px; border: solid 1px #777; }
-		.tb th { background-color: #ff33cc; }
+
+		.tb {
+			font-family: Arial, Helvetica, sans-serif;
+			border-collapse: collapse;
+			width: 80%;
+			margin-inline: auto;
+		}
+
+		.tb td,
+		.tb th {
+			border: 1px solid #ddd;
+			padding: 8px;
+		}
+
+
+		.tb th {
+			padding-top: 12px;
+			padding-bottom: 12px;
+			text-align: left;
+			background-color: #2E4756;
+			color: white;
+		}
+
+		a {
+			color: black
+		}
+
+		.selected-perks {
+			min-height: 30px;
+			display: flex;
+			flex-direction: row;
+			align-items: center;
+		}
+
+		.selected-perks .header {
+			margin-right: 10px;
+		}
+
+		.selected-perks .perk {
+			padding: 5px;
+			border-radius: 2px;
+			border:#2E4756 1px ridge;
+		}
+
+		.selected-perks .roll-chance {
+			margin-left: 10px;
+		}
 	</style>
 </head>
 
 <body>
-	
+
 	<div id="app"></div>
 
 	<script async src="https://nwdb.info/embed.js"></script>
 	<script type="module" src="./script.module.js"></script>
-	
+
 </body>
 
 

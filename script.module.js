@@ -8,6 +8,8 @@ function App() {
   const [perkInfos, setPerkInfos] = useState([]);
   const [removedLabels, setRemovedLabels] = useState([]);
   const [hideRemovedLabels, setHideRemovedLabels] = useState(false);
+  const [selectedPerks, setSelectedPerks] = useState([]);
+  const [rollChance, setRollChance] = useState(null);
 
   const dataReducer = (state, action) =>  {
     switch(action.type) {
@@ -16,28 +18,69 @@ function App() {
         return action.newState;
       case 'check':
         const { index } = action;
+        const selected = selectedPerks.slice();
         // get a copy
         const newState = JSON.parse(JSON.stringify(state));
         const checkedItem = newState[index];
+        let checked; // new item is checked or unchecked
         if (checkedItem.checked === false) {
-          newState.forEach(e => e.checked = false)
+          checked = true;
+          if (selected.length === 3) {
+            return state;
+          }
+          selected.push(checkedItem)
+        } else {
+          checked = false;
+          selected.splice(selected.findIndex(e => e.perk.name === checkedItem.perk.name), 1);
         }
-        checkedItem.checked = !checkedItem.checked;
-        const newRemovedLabels = checkedItem.checked ? checkedItem.labels : []
-        setRemovedLabels(newRemovedLabels);
-        let totalChanceRemaining = 0;
-        newState.forEach(item => {
-          if (!compareLabels(item.labels, newRemovedLabels)) {
-            item.chance = item.original.chance;
-            totalChanceRemaining += item.original.chance;
-          } 
-        }); 
 
-        newState.forEach(item => {
-          if (!compareLabels(item.labels, newRemovedLabels)) {
-            item.chanceAfter = item.chance / totalChanceRemaining ;
+        checkedItem.checked = !checkedItem.checked;
+
+        setSelectedPerks(selected);
+        const newRemovedLabels = selected.reduce((r, c) => {
+          r.push(...c.perk.labels);
+          return r;
+        }, []);
+
+        setRemovedLabels(newRemovedLabels);
+
+        function modifyChances (labels) {
+          let totalChanceRemaining = 0;
+          newState.forEach(item => {
+            if (!compareLabels(item.labels, labels)) {
+              item.chance = item.original.chance;
+              totalChanceRemaining += item.original.chance;
+            } 
+          }); 
+
+          let checksum = 0;
+          newState.forEach(item => {
+            if (!compareLabels(item.labels, labels)) {
+              item.chanceAfter = item.chance / totalChanceRemaining ;
+              checksum += item.chanceAfter;
+            }
+          });
+
+          console.log('checksum is : ', checksum);
+        }
+
+        let rc = 1;
+
+        if (!selected.length) {
+          modifyChances([])
+          setRollChance(null);
+          return newState;
+        }
+
+        selected.forEach((selectedPerk, i) => {
+          modifyChances(selectedPerk.perk.labels);
+
+          if (i > 0) {
+            rc =  rc * newState.find(e => e.perk.name === selectedPerk.perk.name).chanceAfter;
           }
         });
+
+        setRollChance(rc);
 
         return newState;
     }
@@ -61,6 +104,9 @@ function App() {
     // fill the tableData with only the relevant perk infos
     const r = await getBuckets(url);
   
+    setRemovedLabels([]);
+    setRollChance(null);
+    setSelectedPerks([]);
     setPerkInfos(r);
   }
 
@@ -115,6 +161,16 @@ function App() {
           </p>
         ` : null
       }
+
+      ${selectedPerks.length ? 
+      html`<p class="selected-perks">
+        <span class="header">Selected perks :</span>
+        ${
+          selectedPerks.map(p => html`<span class="perk">${p.perk.name}</span>`)
+        }
+        ${ rollChance !== null ? html`<span class="roll-chance">Roll chance ${selectedPerks.length === 3 ? '(assuming legendary)' : ''}: ${(rollChance * 100).toFixed(6)} %</span>` : null }
+      </p>` : html`<p class="selected-perks"></p>`}
+
       ${ resultsReady ? 
           html`
             <table class="tb">
@@ -136,7 +192,7 @@ function App() {
                     return html`
                       <tr style=${{ 'background-color': compareLabels(item.perk.labels) ? 'lightgray' : 'white' }}>
                         <td>
-                          <input disabled=${compareLabels(item.perk.labels) && !item.checked} type="checkbox" checked=${item.checked}
+                          <input disabled=${!item.checked  && (compareLabels(item.perk.labels) || selectedPerks.length === 3 )} type="checkbox" checked=${item.checked}
                             onChange=${() => updateData({ type: 'check', index })}/>
                         </td>
                         <td>
